@@ -17,6 +17,8 @@ const percentText = $("#percentText");
 const progressBar = $("#progressBar");
 const result = $("#result");
 const preview = $("#preview");
+const resultMeta = $("#resultMeta");
+const copyBtn = $("#copyBtn");
 const formatSelect = $("#formatSelect");
 const viewSelect = $("#viewSelect");
 const downloadBtn = $("#downloadBtn");
@@ -79,6 +81,7 @@ let pollTimer = null;
 let currentConvertId = null;
 let convertPollTimer = null;
 let settingsData = null;
+let copyResetTimer = null;
 
 function activateTab(name) {
   $$(".tab").forEach((tab) => {
@@ -156,13 +159,47 @@ function stopConvertPolling() {
   convertPollTimer = null;
 }
 
+function setTranscriptionRunning(running) {
+  submitBtn.disabled = running;
+  diarizeInput.disabled = running;
+  diarizationEngineSelect.disabled = running;
+  speakersInput.disabled = running;
+}
+
+function diarizationSummary(job) {
+  if (!job.diarize) return "Диаризация выключена";
+  const engine = job.diarization_engine === "pyannote" ? "pyannote.audio" : "NVIDIA NeMo";
+  const requested = job.speakers ? `задано: ${job.speakers}` : "число спикеров: авто";
+  const detected = job.speakers_detected ? `, найдено: ${job.speakers_detected}` : "";
+  return `${engine} · ${requested}${detected}`;
+}
+
+async function copyPreview() {
+  if (!preview.value) return;
+  let copied = false;
+  try {
+    await navigator.clipboard.writeText(preview.value);
+    copied = true;
+  } catch {
+    const selectionStart = preview.selectionStart;
+    const selectionEnd = preview.selectionEnd;
+    preview.focus();
+    preview.select();
+    copied = document.execCommand("copy");
+    preview.setSelectionRange(selectionStart, selectionEnd);
+  }
+  copyBtn.textContent = copied ? "Скопировано" : "Не удалось скопировать";
+  clearTimeout(copyResetTimer);
+  copyResetTimer = setTimeout(() => { copyBtn.textContent = "Копировать текст"; }, 1800);
+}
+
 async function pollJob() {
   if (!currentJobId) return;
   const response = await fetch(`/api/jobs/${currentJobId}`);
   if (!response.ok) {
     setProgress(progressBar, percentText, statusText, transcribeProgress, 0, text.noStatus, "error");
     stopPolling();
-    submitBtn.disabled = false;
+    setTranscriptionRunning(false);
     return;
   }
   const job = await response.json();
@@ -170,16 +207,16 @@ async function pollJob() {
   transcribeProgress.classList.toggle("model-download", job.phase === "model_download");
   if (job.status === "done") {
     stopPolling();
-    submitBtn.disabled = false;
+    setTranscriptionRunning(false);
     result.hidden = false;
     preview.value = job.text_preview || "";
-    loadSettings();
+    resultMeta.textContent = diarizationSummary(job);
   } else if (job.status === "error") {
     stopPolling();
-    submitBtn.disabled = false;
+    setTranscriptionRunning(false);
     preview.value = job.error || "";
+    resultMeta.textContent = "Транскрипция завершилась с ошибкой";
     result.hidden = false;
-    loadSettings();
   }
 }
 
@@ -258,10 +295,10 @@ async function loadSettings() {
     vramInput.value = config.hardware?.vram_gb ?? hardware.vram_gb;
     profileSelect.value = config.hardware?.profile ?? "balanced";
     defaultDiarizationSelect.value = dc.default_engine ?? "nemo";
-    defaultSpeakersInput.value = dc.default_speakers ?? 4;
+    defaultSpeakersInput.value = dc.default_speakers ?? 0;
     maxUploadInput.value = config.max_upload_mb ?? 2048;
     diarizationEngineSelect.value = dc.default_engine ?? "nemo";
-    speakersInput.value = dc.default_speakers ?? 4;
+    speakersInput.value = dc.default_speakers ?? 0;
     diarizeInput.checked = Boolean(dc.enabled_by_default);
     engineWrap.hidden = !diarizeInput.checked;
     speakersWrap.hidden = !diarizeInput.checked;
@@ -382,6 +419,8 @@ diarizeInput.addEventListener("change", () => {
   engineWrap.hidden = !diarizeInput.checked;
   speakersWrap.hidden = !diarizeInput.checked;
 });
+
+copyBtn.addEventListener("click", copyPreview);
 batchedInput.addEventListener("change", () => {
   batchSizeInput.disabled = !batchedInput.checked;
   profileSelect.value = "manual";
@@ -407,14 +446,15 @@ form.addEventListener("submit", async (event) => {
   stopPolling();
   result.hidden = true;
   preview.value = "";
-  submitBtn.disabled = true;
+  resultMeta.textContent = "";
+  setTranscriptionRunning(true);
   setProgress(progressBar, percentText, statusText, transcribeProgress, 1, text.uploadFile, "running");
   const data = new FormData();
   data.append("file", file);
   if (languageInput.value.trim()) data.append("language", languageInput.value.trim());
   data.append("diarize", diarizeInput.checked ? "true" : "false");
   data.append("diarization_engine", diarizationEngineSelect.value);
-  data.append("speakers", speakersInput.value || "4");
+  data.append("speakers", speakersInput.value || "0");
   try {
     const response = await fetch("/api/jobs", { method: "POST", body: data });
     if (!response.ok) throw new Error(await readError(response));
@@ -424,7 +464,7 @@ form.addEventListener("submit", async (event) => {
     await pollJob();
   } catch (error) {
     setProgress(progressBar, percentText, statusText, transcribeProgress, 0, `${text.error}: ${error.message}`, "error");
-    submitBtn.disabled = false;
+    setTranscriptionRunning(false);
   }
 });
 

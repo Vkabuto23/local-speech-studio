@@ -80,7 +80,9 @@ Recommended for multilingual audio and maximum throughput. It uses faster-whispe
 
 ## Speaker Diarization
 
-Enable **Split by speakers**, select NeMo or pyannote, and enter the expected number of speakers. Both transcription engines produce word timestamps used by the common speaker-assignment stage.
+Enable **Split by speakers**, select NeMo or pyannote, and choose automatic speaker counting or an exact expected number. When the participant count is known, entering the exact number is usually more reliable than automatic clustering. Both transcription engines produce word timestamps used by the common speaker-assignment stage.
+
+The on-screen preview contains the complete transcript and can be copied directly without downloading a file.
 
 NeMo is installed by default for NVIDIA GPU systems. Some pyannote models require a Hugging Face read token and acceptance of their model terms. Copy `.env.example` to `.env` and set:
 

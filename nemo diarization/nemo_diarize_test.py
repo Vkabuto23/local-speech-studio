@@ -33,7 +33,7 @@ def to_wav(input_path: Path, wav_path: Path) -> None:
     )
 
 
-def write_manifest(wav_path: Path, manifest_path: Path, num_speakers: int) -> None:
+def write_manifest(wav_path: Path, manifest_path: Path, num_speakers: int | None) -> None:
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     item = {
         "audio_filepath": str(wav_path.resolve()),
@@ -48,7 +48,7 @@ def write_manifest(wav_path: Path, manifest_path: Path, num_speakers: int) -> No
     manifest_path.write_text(json.dumps(item, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
-def write_config(manifest_path: Path, out_dir: Path, config_path: Path, num_speakers: int) -> None:
+def write_config(manifest_path: Path, out_dir: Path, config_path: Path, num_speakers: int | None) -> None:
     config = {
         "name": "nemo_clustering_diarizer",
         "verbose": True,
@@ -90,8 +90,8 @@ def write_config(manifest_path: Path, out_dir: Path, config_path: Path, num_spea
             },
             "clustering": {
                 "parameters": {
-                    "oracle_num_speakers": True,
-                    "max_num_speakers": num_speakers,
+                    "oracle_num_speakers": num_speakers is not None,
+                    "max_num_speakers": num_speakers or 8,
                     "enhanced_count_thres": 80,
                     "max_rp_threshold": 0.25,
                     "sparse_search_volume": 30,
@@ -121,7 +121,7 @@ def parse_rttm(path: Path) -> list[dict]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", required=True)
-    parser.add_argument("--speakers", type=int, default=4)
+    parser.add_argument("--speakers", default="auto")
     parser.add_argument("--work-dir", default="/workspace/nemo_out")
     args = parser.parse_args()
 
@@ -138,8 +138,11 @@ def main() -> None:
     config_path = work_dir / "diarizer.yaml"
 
     to_wav(input_path, wav_path)
-    write_manifest(wav_path, manifest_path, args.speakers)
-    write_config(manifest_path, work_dir, config_path, args.speakers)
+    num_speakers = None if args.speakers == "auto" else int(args.speakers)
+    if num_speakers is not None and not 1 <= num_speakers <= 12:
+        parser.error("--speakers must be auto or an integer between 1 and 12")
+    write_manifest(wav_path, manifest_path, num_speakers)
+    write_config(manifest_path, work_dir, config_path, num_speakers)
 
     cfg = OmegaConf.load(config_path)
     diarizer = ClusteringDiarizer(cfg=cfg)

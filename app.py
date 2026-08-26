@@ -308,7 +308,7 @@ async def run_transcription(
     language: Optional[str],
     diarize: bool = False,
     diarization_engine: str = "nemo",
-    speakers: int = 4,
+    speakers: Optional[int] = None,
 ) -> None:
     global ACTIVE_GPU_JOB_ID
     config = load_config()
@@ -378,15 +378,26 @@ async def run_transcription(
                     speaker_turns = await asyncio.to_thread(
                         diarize_file,
                         file_path=file_path,
-                    model_id=dc.get("model", "pyannote-community/speaker-diarization-community-1"),
-                    device=dc.get("device", "cuda"),
-                    ffmpeg_path=ffmpeg_path,
-                    num_speakers=speakers,
-                    on_progress=lambda percent, message: set_progress(job_id, percent, message, "running"),
+                        model_id=dc.get("model", "pyannote-community/speaker-diarization-community-1"),
+                        device=dc.get("device", "cuda"),
+                        ffmpeg_path=ffmpeg_path,
+                        num_speakers=speakers,
+                        on_progress=lambda percent, message: set_progress(job_id, percent, message, "running"),
                     )
                 result = assign_speakers(result, speaker_turns)
                 result["diarization_engine"] = diarization_engine
                 result["speaker_count_requested"] = speakers
+                detected_speakers = {
+                    str(segment.get("speaker"))
+                    for segment in result.get("segments", [])
+                    if segment.get("speaker") is not None
+                }
+                result["speaker_count_detected"] = len(
+                    detected_speakers
+                    or {str(turn.get("speaker")) for turn in speaker_turns if turn.get("speaker") is not None}
+                )
+            else:
+                result["diarized"] = False
 
         JOBS[job_id]["result"] = result
         set_progress(job_id, 100, "Complete", "done")
@@ -485,13 +496,14 @@ async def create_job(
     language: Optional[str] = Form(default=None),
     diarize: bool = Form(default=False),
     diarization_engine: str = Form(default="nemo"),
-    speakers: int = Form(default=4),
+    speakers: int = Form(default=0),
 ) -> Dict[str, Any]:
     diarization_engine = diarization_engine.lower()
     if diarization_engine not in {"nemo", "pyannote"}:
         raise HTTPException(400, "diarization_engine must be nemo or pyannote")
-    if not 1 <= speakers <= 12:
-        raise HTTPException(400, "speakers must be between 1 and 12")
+    if not 0 <= speakers <= 12:
+        raise HTTPException(400, "speakers must be 0 (auto) or between 1 and 12")
+    requested_speakers = speakers or None
     config = load_config()
     max_upload_mb = int(config.get("max_upload_mb", 2048))
     job_id = str(uuid.uuid4())
@@ -529,11 +541,19 @@ async def create_job(
         "result": None,
         "error": None,
         "diarize": diarize,
-        "diarization_engine": diarization_engine,
-        "speakers": speakers,
+        "diarization_engine": diarization_engine if diarize else None,
+        "speakers": requested_speakers if diarize else None,
     }
     QUEUED_JOB_IDS.append(job_id)
-    background_tasks.add_task(run_transcription, job_id, str(dest), language, diarize, diarization_engine, speakers)
+    background_tasks.add_task(
+        run_transcription,
+        job_id,
+        str(dest),
+        language,
+        diarize,
+        diarization_engine,
+        requested_speakers,
+    )
     return {"job_id": job_id}
 
 
@@ -546,6 +566,7 @@ def get_job(job_id: str) -> Dict[str, Any]:
     message = job["message"]
     if queue_position:
         message = f"Queued: position {queue_position}"
+    result = job.get("result") or {}
     return {
         "id": job["id"],
         "filename": job["filename"],
@@ -559,7 +580,8 @@ def get_job(job_id: str) -> Dict[str, Any]:
         "diarize": job.get("diarize", False),
         "diarization_engine": job.get("diarization_engine"),
         "speakers": job.get("speakers"),
-        "text_preview": diarized_text(job.get("result") or {})[:1200],
+        "speakers_detected": result.get("speaker_count_detected"),
+        "text_preview": diarized_text(result),
     }
 
 

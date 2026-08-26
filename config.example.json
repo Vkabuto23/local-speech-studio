@@ -35,7 +35,7 @@
     "device": "cuda",
     "enabled_by_default": false,
     "default_engine": "nemo",
-    "default_speakers": 4,
+    "default_speakers": 0,
     "keep_artifacts": false
   },
   "ffmpeg_path": "ffmpeg",

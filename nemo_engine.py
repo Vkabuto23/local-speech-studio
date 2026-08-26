@@ -35,7 +35,7 @@ def nemo_available() -> bool:
 
 def diarize_file_with_nemo(
     file_path: str,
-    speakers: int = 4,
+    speakers: Optional[int] = None,
     keep_artifacts: bool = False,
     on_progress: Optional[Callable[[int, str], None]] = None,
 ) -> List[Dict[str, Any]]:
@@ -59,12 +59,13 @@ def diarize_file_with_nemo(
         "--input",
         str(Path(file_path).resolve()),
         "--speakers",
-        str(max(1, int(speakers or 4))),
+        str(max(1, int(speakers))) if speakers else "auto",
         "--work-dir",
         str(work_dir.resolve()),
     ]
 
-    progress(82, f"Running NeMo diarization with {speakers} speakers")
+    speaker_mode = f"exactly {speakers} speakers" if speakers else "automatic speaker count"
+    progress(82, f"Running NeMo diarization with {speaker_mode}")
     proc = subprocess.Popen(
         cmd,
         cwd=str(NEMO_DIR),

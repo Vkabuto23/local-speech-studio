@@ -82,6 +82,18 @@ class RuntimeSettingsTests(unittest.TestCase):
                 {"transcriptor": {"engine": "unknown"}},
             )
 
+    def test_automatic_speaker_count_is_allowed(self) -> None:
+        current = {
+            "hardware": {"profile": "balanced", "vram_gb": 8},
+            "transcriptor": {},
+            "gigaam": {},
+            "diarization": {"default_engine": "nemo", "default_speakers": 4},
+        }
+
+        result = validate_settings(current, {"diarization": {"default_speakers": 0}})
+
+        self.assertEqual(result["diarization"]["default_speakers"], 0)
+
 
 if __name__ == "__main__":
     unittest.main()

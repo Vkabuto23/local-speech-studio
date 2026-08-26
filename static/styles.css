@@ -215,7 +215,10 @@ button.small-button { height: 36px; min-width: 100px; padding: 0 12px; font-size
 
 .result { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 20px; }
 .result.compact { display: flex; justify-content: flex-end; }
-textarea { width: 100%; min-height: 260px; margin-top: 16px; border: 1px solid var(--line-strong); border-radius: 7px; padding: 12px; resize: vertical; color: var(--ink); background: #fbfcfc; }
+.preview-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
+.preview-heading span { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.preview-heading button { flex: 0 0 auto; }
+textarea { width: 100%; min-height: 360px; margin-top: 10px; border: 1px solid var(--line-strong); border-radius: 7px; padding: 12px; resize: vertical; color: var(--ink); background: #fbfcfc; }
 
 .settings-panel { padding-top: 0; }
 .settings-section { padding: 22px 0; border-top: 1px solid var(--line); }
@@ -295,5 +298,6 @@ textarea { width: 100%; min-height: 260px; margin-top: 16px; border: 1px solid v
   .hardware-strip > div:first-child { border-top: 0; }
   .engine-switch { grid-template-columns: 1fr; }
   .settings-actions { align-items: stretch; flex-direction: column; }
+  .preview-heading { align-items: stretch; flex-direction: column; }
   button { width: 100%; }
 }

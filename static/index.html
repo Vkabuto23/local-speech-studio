@@ -49,8 +49,22 @@
                 </select>
               </label>
               <label class="diarize-option narrow" id="speakersWrap" hidden>
-                Спикеры
-                <input id="speakersInput" name="speakers" type="number" min="1" max="12" step="1" value="4" />
+                Число спикеров
+                <select id="speakersInput" name="speakers">
+                  <option value="0">Авто</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                  <option value="9">9</option>
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                  <option value="12">12</option>
+                </select>
               </label>
               <button type="submit" id="submitBtn">Запустить</button>
             </div>
@@ -84,6 +98,10 @@
                 </select>
               </label>
               <button type="button" id="downloadBtn">Скачать</button>
+            </div>
+            <div class="preview-heading">
+              <span id="resultMeta"></span>
+              <button type="button" class="secondary small-button" id="copyBtn">Копировать текст</button>
             </div>
             <textarea id="preview" readonly aria-label="Предпросмотр транскрипции"></textarea>
           </section>
@@ -198,7 +216,7 @@
             <div class="section-heading"><div><h2>Диаризация и файлы</h2></div></div>
             <div class="settings-grid compact-grid">
               <label>Движок по умолчанию<select id="defaultDiarizationSelect"><option value="nemo">NVIDIA NeMo</option><option value="pyannote">pyannote.audio</option></select></label>
-              <label>Спикеров по умолчанию<input id="defaultSpeakersInput" type="number" min="1" max="12" /></label>
+              <label>Спикеров по умолчанию (0 = авто)<input id="defaultSpeakersInput" type="number" min="0" max="12" /></label>
               <label>Лимит загрузки, МБ<input id="maxUploadInput" type="number" min="32" max="16384" /></label>
             </div>
           </section>

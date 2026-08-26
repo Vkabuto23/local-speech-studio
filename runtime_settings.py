@@ -240,9 +240,9 @@ def validate_settings(current: Dict[str, Any], payload: Dict[str, Any]) -> Dict[
     engine = str(incoming_dc.get("default_engine", diarization.get("default_engine", "nemo")))
     if engine not in {"nemo", "pyannote"}:
         raise ValueError("Unknown diarization engine")
-    speakers = int(incoming_dc.get("default_speakers", diarization.get("default_speakers", 4)))
-    if not 1 <= speakers <= 12:
-        raise ValueError("Speaker count must be between 1 and 12")
+    speakers = int(incoming_dc.get("default_speakers", diarization.get("default_speakers", 0)))
+    if not 0 <= speakers <= 12:
+        raise ValueError("Speaker count must be 0 (auto) or between 1 and 12")
     diarization.update(default_engine=engine, default_speakers=speakers)
 
     max_upload_mb = int(payload.get("max_upload_mb", updated.get("max_upload_mb", 2048)))
