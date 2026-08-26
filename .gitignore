@@ -1,0 +1,36 @@
+# Local environments and downloaded runtimes
+.venv/
+**/.venv-*/
+gigaam runtime/GigaAM/
+
+# User configuration and secrets
+.env
+.env.*
+!.env.example
+config.json
+
+# User media, generated files, and model artifacts
+data/
+output/
+tmp/
+nemo diarization/out/
+nemo diarization/runs/
+models/
+*.ckpt
+*.onnx
+*.pt
+*.pth
+
+# Python and test caches
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Local tools and operating-system files
+.playwright-cli/
+*.log
+*.lnk
+.DS_Store
+Thumbs.db

@@ -1,0 +1,43 @@
+{
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8015
+  },
+  "hardware": {
+    "profile": "balanced",
+    "vram_gb": 0.0
+  },
+  "transcriptor": {
+    "engine": "gigaam",
+    "model": "large-v3-turbo",
+    "device": "cuda",
+    "compute_type": "float16",
+    "language": null,
+    "beam_size": 5,
+    "batched_inference": true,
+    "batch_size": 8,
+    "cpu_threads": 4,
+    "num_workers": 1,
+    "device_index": 0,
+    "vad_filter": true,
+    "vad_min_silence_ms": 500
+  },
+  "gigaam": {
+    "model": "v3_e2e_rnnt",
+    "device": "cuda",
+    "batch_size": 4,
+    "vad_threshold": 0.5,
+    "vad_min_silence_ms": 500,
+    "max_segment_seconds": 23.0
+  },
+  "diarization": {
+    "model": "pyannote-community/speaker-diarization-community-1",
+    "device": "cuda",
+    "enabled_by_default": false,
+    "default_engine": "nemo",
+    "default_speakers": 4,
+    "keep_artifacts": false
+  },
+  "ffmpeg_path": "ffmpeg",
+  "max_upload_mb": 2048
+}

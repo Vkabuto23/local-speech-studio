@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Local Speech Studio</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel">
+        <header class="app-header">
+          <div>
+            <p>LOCAL SPEECH STUDIO</p>
+            <h1>Транскрипция и диаризация</h1>
+          </div>
+          <div class="runtime-badge" id="runtimeBadge">Загрузка конфигурации</div>
+        </header>
+
+        <nav class="tabs" role="tablist" aria-label="Разделы приложения">
+          <button class="tab active" type="button" role="tab" aria-selected="true" data-tab="transcription">Транскрипция</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-tab="converter">Видео в аудио</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-tab="settings">Настройки</button>
+        </nav>
+
+        <section class="tab-panel active" data-panel="transcription">
+          <form id="uploadForm" class="upload">
+            <label class="dropzone" id="dropzone">
+              <input id="fileInput" name="file" type="file" accept="audio/*,video/*,.webm,.mkv,.m4a,.ogg,.opus" />
+              <span class="drop-title">Перетащите аудио или видео</span>
+              <span class="drop-subtitle" id="fileName">MP3, WAV, M4A, OGG, WEBM, MP4, MOV, MKV и AVI</span>
+            </label>
+
+            <div class="controls transcription-controls">
+              <label>
+                Язык
+                <input id="languageInput" name="language" type="text" placeholder="auto, ru, en..." />
+              </label>
+              <label class="check">
+                <input id="diarizeInput" name="diarize" type="checkbox" />
+                <span>Разбить по спикерам</span>
+              </label>
+              <label class="diarize-option" id="engineWrap" hidden>
+                Диаризация
+                <select id="diarizationEngineSelect" name="diarization_engine">
+                  <option value="nemo">NVIDIA NeMo</option>
+                  <option value="pyannote">pyannote.audio</option>
+                </select>
+              </label>
+              <label class="diarize-option narrow" id="speakersWrap" hidden>
+                Спикеры
+                <input id="speakersInput" name="speakers" type="number" min="1" max="12" step="1" value="4" />
+              </label>
+              <button type="submit" id="submitBtn">Запустить</button>
+            </div>
+          </form>
+
+          <div class="progress-wrap" id="transcribeProgress">
+            <div class="progress-info">
+              <span id="statusText">Ожидаю файл</span>
+              <strong id="percentText">0%</strong>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Прогресс транскрипции">
+              <div id="progressBar"></div>
+            </div>
+          </div>
+
+          <section class="result" id="result" hidden>
+            <div class="download-grid">
+              <label>
+                Формат
+                <select id="formatSelect">
+                  <option value="pdf">PDF</option>
+                  <option value="md">Markdown</option>
+                  <option value="txt">TXT</option>
+                </select>
+              </label>
+              <label>
+                Структура
+                <select id="viewSelect">
+                  <option value="simple">Только текст</option>
+                  <option value="full">Полный ответ движка</option>
+                </select>
+              </label>
+              <button type="button" id="downloadBtn">Скачать</button>
+            </div>
+            <textarea id="preview" readonly aria-label="Предпросмотр транскрипции"></textarea>
+          </section>
+        </section>
+
+        <section class="tab-panel" data-panel="converter" hidden>
+          <form id="convertForm" class="upload">
+            <label class="dropzone" id="convertDropzone">
+              <input id="convertFileInput" name="file" type="file" accept="video/*,.mp4,.mov,.mkv,.webm,.avi" />
+              <span class="drop-title">Перетащите видео</span>
+              <span class="drop-subtitle" id="convertFileName">MP4, MOV, MKV, WEBM или AVI</span>
+            </label>
+
+            <div class="controls converter-controls">
+              <label>
+                Формат аудио
+                <select id="audioFormatSelect" name="audio_format">
+                  <option value="mp3">MP3 192 kbps</option>
+                  <option value="wav">WAV 16 kHz mono</option>
+                  <option value="m4a">M4A AAC 192 kbps</option>
+                </select>
+              </label>
+              <button type="submit" id="convertSubmitBtn">Конвертировать</button>
+            </div>
+          </form>
+
+          <div class="progress-wrap" id="convertProgress">
+            <div class="progress-info">
+              <span id="convertStatusText">Ожидаю видео</span>
+              <strong id="convertPercentText">0%</strong>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Прогресс конвертации">
+              <div id="convertProgressBar"></div>
+            </div>
+          </div>
+
+          <section class="result compact" id="convertResult" hidden>
+            <button type="button" id="convertDownloadBtn">Скачать аудио</button>
+          </section>
+        </section>
+
+        <section class="tab-panel settings-panel" data-panel="settings" hidden>
+          <section class="settings-section first">
+            <div class="section-heading">
+              <div>
+                <h2>Обнаруженное железо</h2>
+                <p>Параметры читаются локально при открытии страницы.</p>
+              </div>
+              <button class="secondary small-button" type="button" id="refreshSettingsBtn">Обновить</button>
+            </div>
+            <div class="hardware-strip">
+              <div><span>GPU</span><strong id="gpuName">-</strong></div>
+              <div><span>VRAM</span><strong id="detectedVram">-</strong></div>
+              <div><span>CPU</span><strong id="cpuCores">-</strong></div>
+              <div><span>Хранилище</span><strong id="storageUsage">-</strong></div>
+            </div>
+          </section>
+
+          <section class="settings-section">
+            <div class="section-heading"><div><h2>Движок распознавания</h2><p>Переключение применяется ко всем новым заданиям.</p></div></div>
+            <div class="engine-switch" role="radiogroup" aria-label="Движок распознавания">
+              <label class="engine-option" data-engine-option="whisper">
+                <input type="radio" name="transcriptionEngine" value="whisper" />
+                <span><strong>Whisper V3 Large Turbo</strong><small>Универсальный движок для разных языков</small></span>
+              </label>
+              <label class="engine-option recommended" data-engine-option="gigaam">
+                <input type="radio" name="transcriptionEngine" value="gigaam" />
+                <span><strong>GigaAM V3 E2E RNNT</strong><small>Рекомендуется для русских встреч</small></span>
+                <em>RU</em>
+              </label>
+            </div>
+            <p class="engine-note" id="gigaamAvailability">GigaAM локально проверен на GPU. Авторы модели сообщают преимущество 70:30 над Whisper large-v3 в попарной оценке русской речи.</p>
+          </section>
+
+          <section class="settings-section">
+            <div class="section-heading"><div><h2>Аппаратный профиль</h2><p>Профиль заполняет параметры ниже; их можно поправить вручную.</p></div></div>
+            <div class="settings-grid profile-grid">
+              <label>Доступная VRAM, ГБ<input id="vramInput" type="number" min="0" max="256" step="0.5" /></label>
+              <label>Приоритет<select id="profileSelect"><option value="balanced">Баланс</option><option value="quality">Качество</option><option value="speed">Скорость</option><option value="manual">Вручную</option></select></label>
+              <button class="secondary" type="button" id="applyProfileBtn">Применить профиль</button>
+            </div>
+          </section>
+
+          <details class="settings-section runtime-details" id="whisperRuntimeDetails">
+            <summary><span><strong>Параметры Whisper runtime</strong><small id="whisperRuntimeHint">CTranslate2, batching и очередь GPU</small></span></summary>
+            <div class="settings-grid runtime-grid runtime-details-body">
+              <label>Модель<select id="modelSelect"></select></label>
+              <label>Устройство<select id="deviceSelect"><option value="cuda">CUDA GPU</option><option value="cpu">CPU</option></select></label>
+              <label>Точность вычислений<select id="computeTypeSelect"><option value="float16">float16</option><option value="int8_float16">int8 + float16</option><option value="int8">int8</option><option value="float32">float32</option></select></label>
+              <label>Beam size<input id="beamSizeInput" type="number" min="1" max="10" /></label>
+              <label class="check setting-check"><input id="batchedInput" type="checkbox" /><span>Batched inference</span></label>
+              <label>Batch size<input id="batchSizeInput" type="number" min="1" max="128" /></label>
+              <label>CPU threads<input id="cpuThreadsInput" type="number" min="1" max="128" /></label>
+              <label>Model workers<input id="numWorkersInput" type="number" min="1" max="8" /></label>
+              <label>VAD silence, мс<input id="vadSilenceInput" type="number" min="100" max="5000" step="100" /></label>
+            </div>
+          </details>
+
+          <details class="settings-section runtime-details" id="gigaamRuntimeDetails" hidden>
+            <summary><span><strong>Параметры GigaAM V3 runtime</strong><small id="gigaamRuntimeHint">Русская E2E-модель, batching и VAD</small></span></summary>
+            <div class="settings-grid runtime-grid runtime-details-body">
+              <label>Модель<select id="gigaamModelSelect"><option value="v3_e2e_rnnt">GigaAM V3 E2E RNNT</option><option value="v3_e2e_ctc">GigaAM V3 E2E CTC</option></select></label>
+              <label>Устройство<select id="gigaamDeviceSelect"><option value="cuda">CUDA GPU</option><option value="cpu">CPU</option></select></label>
+              <label>Batch size<input id="gigaamBatchSizeInput" type="number" min="1" max="32" /></label>
+              <label>VAD threshold<input id="gigaamVadThresholdInput" type="number" min="0.1" max="0.9" step="0.05" /></label>
+              <label>VAD silence, мс<input id="gigaamVadSilenceInput" type="number" min="100" max="5000" step="100" /></label>
+              <label>Макс. фрагмент, сек<input id="gigaamMaxSegmentInput" type="number" min="5" max="24" step="0.5" /></label>
+            </div>
+          </details>
+
+          <section class="settings-section">
+            <div class="section-heading"><div><h2>Диаризация и файлы</h2></div></div>
+            <div class="settings-grid compact-grid">
+              <label>Движок по умолчанию<select id="defaultDiarizationSelect"><option value="nemo">NVIDIA NeMo</option><option value="pyannote">pyannote.audio</option></select></label>
+              <label>Спикеров по умолчанию<input id="defaultSpeakersInput" type="number" min="1" max="12" /></label>
+              <label>Лимит загрузки, МБ<input id="maxUploadInput" type="number" min="32" max="16384" /></label>
+            </div>
+          </section>
+
+          <div class="settings-actions">
+            <span id="settingsStatus" role="status"></span>
+            <button type="button" id="saveSettingsBtn">Сохранить конфигурацию</button>
+          </div>
+        </section>
+      </section>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
