@@ -324,9 +324,13 @@ async function loadSettings() {
     gigaamAvailability.textContent = settingsData.gigaam_available
       ? ""
       : "GigaAM runtime не найден. Выберите Whisper или восстановите локальное окружение GigaAM.";
+    const whisperModelLabel = settingsData.model_catalog
+      .find((model) => model.id === tc.model)?.label.replace(/^Whisper\s+/, "") ?? tc.model;
+    const gigaamModelLabel = settingsData.gigaam_model_catalog
+      .find((model) => model.id === gigaam.model)?.label.replace(/^GigaAM\s+/, "") ?? gigaam.model;
     runtimeBadge.textContent = tc.engine === "gigaam"
-      ? `GigaAM V3 · batch ${gigaam.batch_size} · ${runtime.gpu_busy ? "GPU занят" : "GPU свободен"}`
-      : `${tc.model} · batch ${tc.batched_inference ? tc.batch_size : "off"} · ${runtime.gpu_busy ? "GPU занят" : "GPU свободен"}`;
+      ? `GigaAM · ${gigaamModelLabel} · batch ${gigaam.batch_size} · ${runtime.gpu_busy ? "GPU занят" : "GPU свободен"}`
+      : `Whisper · ${whisperModelLabel} · batch ${tc.batched_inference ? tc.batch_size : "off"} · ${runtime.gpu_busy ? "GPU занят" : "GPU свободен"}`;
     settingsStatus.textContent = "";
   } catch (error) {
     runtimeBadge.textContent = "Конфигурация недоступна";

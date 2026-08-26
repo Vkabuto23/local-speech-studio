@@ -8,7 +8,7 @@ Local Speech Studio - локальное Windows-приложение для р�
 
 ### Возможности
 
-- Переключение между Whisper `large-v3-turbo` и GigaAM V3 E2E RNNT.
+- Переключение между движками Whisper и GigaAM. Конкретная модель выбирается в параметрах runtime выбранного движка.
 - GigaAM рекомендуется для русских встреч; Whisper быстрее и поддерживает больше языков.
 - Модель выбранного движка автоматически скачивается при первой транскрипции.
 - В прогрессе отдельно показываются скачивание и загрузка модели с точным названием.
@@ -86,13 +86,13 @@ cd local-speech-studio
 
 При увеличении batch size может потребоваться больше памяти. В CPU-режиме VRAM не используется.
 
-#### GigaAM V3 E2E RNNT
+#### GigaAM
 
-Рекомендуется для русских встреч. Модель выдаёт пунктуацию, нормализованный текст и таймкоды слов. Длинная запись режется через Silero VAD и обрабатывается батчами в отдельном процессе. После задания процесс завершается и освобождает RAM и VRAM.
+Движок для русской речи. В runtime доступны модели GigaAM V3 E2E RNNT и GigaAM V3 E2E CTC. Они выдают пунктуацию, нормализованный текст и таймкоды слов. Длинная запись режется через Silero VAD и обрабатывается батчами в отдельном процессе. После задания процесс завершается и освобождает RAM и VRAM.
 
-#### Whisper large-v3-turbo
+#### Whisper
 
-Рекомендуется для нескольких языков и максимальной скорости. Использует faster-whisper и CTranslate2. В настройках доступны batch size, тип вычислений, beam size, CPU threads и model workers.
+Многоязычный движок на faster-whisper и CTranslate2. В runtime доступны модели large-v3, large-v3-turbo, medium, small и base, а также batch size, тип вычислений, beam size, CPU threads и model workers.
 
 ### Разделение спикеров
 
@@ -150,7 +150,7 @@ Local Speech Studio is a self-hosted Windows application for local speech-to-tex
 
 ## Highlights
 
-- Switch between Whisper `large-v3-turbo` and GigaAM V3 E2E RNNT.
+- Switch between the Whisper and GigaAM engines. Select a concrete model in the runtime settings for the active engine.
 - GigaAM is recommended for Russian meetings; Whisper is the multilingual and faster option.
 - Recognition models download automatically when the selected engine is used for the first time.
 - The job status explicitly shows model download and model loading phases.
@@ -228,13 +228,13 @@ Recommended VRAM headroom for GPU mode with the default settings:
 
 Larger batch sizes can require additional memory. CPU mode does not use VRAM.
 
-### GigaAM V3 E2E RNNT
+### GigaAM
 
-Recommended for Russian meetings. It provides punctuation, text normalization, and word timestamps. Long audio is split with Silero VAD and processed in batches by a per-job subprocess, releasing host and GPU memory after completion.
+An engine for Russian speech. Its runtime provides the GigaAM V3 E2E RNNT and GigaAM V3 E2E CTC models. They provide punctuation, text normalization, and word timestamps. Long audio is split with Silero VAD and processed in batches by a per-job subprocess, releasing host and GPU memory after completion.
 
-### Whisper large-v3-turbo
+### Whisper
 
-Recommended for multilingual audio and maximum throughput. It uses faster-whisper and CTranslate2 with a persistent model cache and configurable batch size, compute type, beam size, and worker count.
+A multilingual engine based on faster-whisper and CTranslate2. Its runtime provides large-v3, large-v3-turbo, medium, small, and base, plus configurable batch size, compute type, beam size, and worker count.
 
 ## Speaker Diarization
 

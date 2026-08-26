@@ -165,11 +165,11 @@
             <div class="engine-switch" role="radiogroup" aria-label="Движок распознавания">
               <label class="engine-option" data-engine-option="whisper">
                 <input type="radio" name="transcriptionEngine" value="whisper" />
-                <span><strong>Whisper V3 Large Turbo</strong><small>Разные языки · VRAM от 8 ГБ</small></span>
+                <span><strong>Whisper</strong><small>5 моделей · разные языки</small></span>
               </label>
               <label class="engine-option" data-engine-option="gigaam">
                 <input type="radio" name="transcriptionEngine" value="gigaam" />
-                <span><strong>GigaAM V3 E2E RNNT</strong><small>Русская речь · VRAM от 4 ГБ</small></span>
+                <span><strong>GigaAM</strong><small>2 модели · русская речь</small></span>
               </label>
             </div>
             <p class="engine-note unavailable" id="gigaamAvailability" hidden></p>
@@ -185,7 +185,7 @@
           </section>
 
           <details class="settings-section runtime-details" id="whisperRuntimeDetails">
-            <summary><span><strong>Параметры Whisper runtime</strong><small id="whisperRuntimeHint">CTranslate2, batching и очередь GPU</small></span></summary>
+            <summary><span><strong>Параметры Whisper runtime</strong><small id="whisperRuntimeHint">5 моделей, CTranslate2 и batching</small></span></summary>
             <div class="settings-grid runtime-grid runtime-details-body">
               <label>Модель<select id="modelSelect"></select></label>
               <label>Устройство<select id="deviceSelect"><option value="cuda">CUDA GPU</option><option value="cpu">CPU</option></select></label>
@@ -200,7 +200,7 @@
           </details>
 
           <details class="settings-section runtime-details" id="gigaamRuntimeDetails" hidden>
-            <summary><span><strong>Параметры GigaAM V3 runtime</strong><small id="gigaamRuntimeHint">Русская E2E-модель, batching и VAD</small></span></summary>
+            <summary><span><strong>Параметры GigaAM runtime</strong><small id="gigaamRuntimeHint">2 модели, batching и VAD</small></span></summary>
             <div class="settings-grid runtime-grid runtime-details-body">
               <label>Модель<select id="gigaamModelSelect"><option value="v3_e2e_rnnt">GigaAM V3 E2E RNNT · VRAM от 4 ГБ</option><option value="v3_e2e_ctc">GigaAM V3 E2E CTC · VRAM от 4 ГБ</option></select></label>
               <label>Устройство<select id="gigaamDeviceSelect"><option value="cuda">CUDA GPU</option><option value="cpu">CPU</option></select></label>
