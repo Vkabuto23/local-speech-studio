@@ -1,6 +1,6 @@
 # Local Speech Studio
 
-[English documentation](README.md)
+[English documentation](README.md#english)
 
 Local Speech Studio - локальное Windows-приложение для распознавания речи, разделения спикеров и конвертации видео в аудио. Файлы остаются на вашем компьютере. Веб-интерфейс поддерживает drag-and-drop, видимый прогресс заданий и экспорт в TXT, Markdown или PDF с корректной кириллицей.
 
