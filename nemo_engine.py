@@ -11,7 +11,7 @@ logger = logging.getLogger("local_whisper.nemo")
 
 BASE_DIR = Path(__file__).resolve().parent
 NEMO_DIR = BASE_DIR / "nemo diarization"
-NEMO_SCRIPT = NEMO_DIR / "nemo_diarize_test.py"
+NEMO_SCRIPT = NEMO_DIR / "nemo_diarize.py"
 NEMO_RUNS_DIR = NEMO_DIR / "runs"
 
 

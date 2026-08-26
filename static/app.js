@@ -279,12 +279,18 @@ async function loadSettings() {
     modelSelect.replaceChildren(...settingsData.model_catalog.map((model) => {
       const option = document.createElement("option");
       option.value = model.id;
-      option.textContent = `${model.label} · от ${model.recommended_vram_gb} ГБ`;
+      option.textContent = `${model.label} · VRAM от ${model.recommended_vram_gb} ГБ`;
       return option;
     }));
     fillRuntime(tc);
     const engineInput = engineInputs.find((input) => input.value === (tc.engine || "whisper"));
     if (engineInput) engineInput.checked = true;
+    gigaamModelSelect.replaceChildren(...settingsData.gigaam_model_catalog.map((model) => {
+      const option = document.createElement("option");
+      option.value = model.id;
+      option.textContent = `${model.label} · VRAM от ${model.recommended_vram_gb} ГБ`;
+      return option;
+    }));
     gigaamModelSelect.value = gigaam.model ?? "v3_e2e_rnnt";
     gigaamDeviceSelect.value = gigaam.device ?? "cuda";
     gigaamBatchSizeInput.value = gigaam.batch_size ?? 4;
@@ -313,12 +319,11 @@ async function loadSettings() {
     $("#gigaamRuntimeHint").textContent = runtime.gpu_busy
       ? `GPU занят, в очереди: ${runtime.queued_jobs}`
       : `GPU свободен, batch ${gigaam.batch_size}`;
-    $("#gigaamAvailability").classList.toggle("unavailable", !settingsData.gigaam_available);
-    if (settingsData.gigaam_available) {
-      $("#gigaamAvailability").textContent = "GigaAM локально проверен на GPU. Авторы модели сообщают преимущество 70:30 над Whisper large-v3 в попарной оценке русской речи.";
-    } else {
-      $("#gigaamAvailability").textContent = "GigaAM runtime не найден. Выберите Whisper или восстановите локальное окружение GigaAM.";
-    }
+    const gigaamAvailability = $("#gigaamAvailability");
+    gigaamAvailability.hidden = settingsData.gigaam_available;
+    gigaamAvailability.textContent = settingsData.gigaam_available
+      ? ""
+      : "GigaAM runtime не найден. Выберите Whisper или восстановите локальное окружение GigaAM.";
     runtimeBadge.textContent = tc.engine === "gigaam"
       ? `GigaAM V3 · batch ${gigaam.batch_size} · ${runtime.gpu_busy ? "GPU занят" : "GPU свободен"}`
       : `${tc.model} · batch ${tc.batched_inference ? tc.batch_size : "off"} · ${runtime.gpu_busy ? "GPU занят" : "GPU свободен"}`;

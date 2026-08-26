@@ -28,6 +28,16 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 
+# Local tests and benchmarks
+tests/
+benchmarks/
+benchmark/
+tools/benchmark*.py
+benchmark-results/
+benchmark_results/
+*.benchmark.json
+*.benchmark.csv
+
 # Local tools and operating-system files
 .playwright-cli/
 *.log

@@ -22,6 +22,7 @@ from exporters import diarized_text, render_export, safe_filename
 from gigaam_engine import gigaam_available, transcribe_file_with_gigaam
 from nemo_engine import NEMO_RUNS_DIR, diarize_file_with_nemo
 from runtime_settings import (
+    GIGAAM_MODEL_CATALOG,
     MODEL_CATALOG,
     all_profiles,
     detect_hardware,
@@ -451,6 +452,7 @@ def settings_payload() -> Dict[str, Any]:
         "hardware": hardware,
         "profiles": all_profiles(configured_vram, bool(hardware["gpu_available"])),
         "model_catalog": MODEL_CATALOG,
+        "gigaam_model_catalog": GIGAAM_MODEL_CATALOG,
         "gigaam_available": gigaam_available(),
         "storage": storage_stats(),
         "runtime": {

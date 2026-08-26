@@ -72,6 +72,20 @@ cd local-speech-studio
 
 ### Выбор движка
 
+Рекомендуемый запас VRAM для GPU-режима со стандартными настройками:
+
+| Модель | Рекомендуемая VRAM |
+| --- | ---: |
+| Whisper large-v3 | от 12 ГБ |
+| Whisper large-v3-turbo | от 8 ГБ |
+| Whisper medium | от 5 ГБ |
+| Whisper small | от 3 ГБ |
+| Whisper base | от 2 ГБ |
+| GigaAM V3 E2E RNNT | от 4 ГБ |
+| GigaAM V3 E2E CTC | от 4 ГБ |
+
+При увеличении batch size может потребоваться больше памяти. В CPU-режиме VRAM не используется.
+
 #### GigaAM V3 E2E RNNT
 
 Рекомендуется для русских встреч. Модель выдаёт пунктуацию, нормализованный текст и таймкоды слов. Длинная запись режется через Silero VAD и обрабатывается батчами в отдельном процессе. После задания процесс завершается и освобождает RAM и VRAM.
@@ -113,18 +127,6 @@ HF_TOKEN=hf_ваш_read_токен
 - После скачивания моделей распознавание выполняется локально.
 - В приложении нет телеметрии.
 - К провайдерам моделей уходят только обычные запросы скачивания отсутствующей модели.
-
-### Разработка и тесты
-
-```powershell
-python -m unittest discover -s tests -v
-```
-
-Запускайте сервер без auto-reload, чтобы не загружать GPU-модель дважды:
-
-```powershell
-.\.venv\Scripts\python.exe -m uvicorn app:app --host 127.0.0.1 --port 8015
-```
 
 ### Решение проблем
 
@@ -212,6 +214,20 @@ The first run can take several minutes depending on the model and connection. La
 
 ## Engine Selection
 
+Recommended VRAM headroom for GPU mode with the default settings:
+
+| Model | Recommended VRAM |
+| --- | ---: |
+| Whisper large-v3 | 12 GB or more |
+| Whisper large-v3-turbo | 8 GB or more |
+| Whisper medium | 5 GB or more |
+| Whisper small | 3 GB or more |
+| Whisper base | 2 GB or more |
+| GigaAM V3 E2E RNNT | 4 GB or more |
+| GigaAM V3 E2E CTC | 4 GB or more |
+
+Larger batch sizes can require additional memory. CPU mode does not use VRAM.
+
 ### GigaAM V3 E2E RNNT
 
 Recommended for Russian meetings. It provides punctuation, text normalization, and word timestamps. Long audio is split with Silero VAD and processed in batches by a per-job subprocess, releasing host and GPU memory after completion.
@@ -253,18 +269,6 @@ Hardware profiles configure Whisper automatically from available VRAM. GigaAM ha
 - Recognition runs locally after model download.
 - No application telemetry is implemented.
 - Model providers receive ordinary download requests only when a model is missing.
-
-## Development
-
-```powershell
-python -m unittest discover -s tests -v
-```
-
-Run without auto-reload to avoid duplicate GPU model allocation:
-
-```powershell
-.\.venv\Scripts\python.exe -m uvicorn app:app --host 127.0.0.1 --port 8015
-```
 
 ## Troubleshooting
 

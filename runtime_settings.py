@@ -40,6 +40,19 @@ MODEL_CATALOG = [
     },
 ]
 
+GIGAAM_MODEL_CATALOG = [
+    {
+        "id": "v3_e2e_rnnt",
+        "label": "GigaAM V3 E2E RNNT",
+        "recommended_vram_gb": 4,
+    },
+    {
+        "id": "v3_e2e_ctc",
+        "label": "GigaAM V3 E2E CTC",
+        "recommended_vram_gb": 4,
+    },
+]
+
 _CONFIG_LOCK = threading.Lock()
 
 
@@ -206,7 +219,8 @@ def validate_settings(current: Dict[str, Any], payload: Dict[str, Any]) -> Dict[
 
     incoming_gigaam = payload.get("gigaam", {})
     gigaam_model = str(incoming_gigaam.get("model", gigaam.get("model", "v3_e2e_rnnt")))
-    if gigaam_model not in {"v3_e2e_rnnt", "v3_e2e_ctc"}:
+    allowed_gigaam_models = {item["id"] for item in GIGAAM_MODEL_CATALOG}
+    if gigaam_model not in allowed_gigaam_models:
         raise ValueError("Unsupported GigaAM model")
     gigaam_device = str(incoming_gigaam.get("device", gigaam.get("device", "cuda"))).lower()
     if gigaam_device not in {"cuda", "cpu"}:
