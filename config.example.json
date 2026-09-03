@@ -36,6 +36,9 @@
     "enabled_by_default": false,
     "default_engine": "nemo",
     "default_speakers": 0,
+    "batch_size": 128,
+    "num_workers": 0,
+    "reuse_transcription_vad": true,
     "keep_artifacts": false
   },
   "ffmpeg_path": "ffmpeg",

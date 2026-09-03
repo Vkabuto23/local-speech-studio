@@ -102,6 +102,8 @@ cd local-speech-studio
 
 NeMo устанавливается по умолчанию на системах с NVIDIA GPU. Для некоторых моделей pyannote нужен read-токен Hugging Face и принятие условий модели. Скопируйте `.env.example` в `.env` и заполните:
 
+NeMo использует CUDA для VAD и TitaNet embeddings. В настройках доступны отдельный batch size и число data workers. Опция **NeMo: использовать VAD транскрипции** исключает повторный проход детектора речи: NeMo получает интервалы, уже найденные Whisper или GigaAM, но сохраняет полное трёхмасштабное извлечение embeddings и кластеризацию. NeMo runtime прогревается при запуске приложения, поэтому тяжёлые импорты не входят во время задания. Для RTX 5090 проверенное значение batch size равно 256.
+
 ```dotenv
 HF_TOKEN=hf_ваш_read_токен
 ```
@@ -118,7 +120,7 @@ HF_TOKEN=hf_ваш_read_токен
 
 Публичные значения находятся в `config.example.json`. При первом запуске они копируются в локальный `config.json`, который исключён из Git. Обычные изменения выполняются через вкладку **Настройки**.
 
-Аппаратные профили автоматически настраивают Whisper по доступной VRAM. У GigaAM отдельные параметры модели, устройства, batch size, VAD threshold, длительности тишины и максимального фрагмента.
+Аппаратные профили автоматически настраивают Whisper по доступной VRAM. У GigaAM отдельные параметры модели, устройства, batch size, VAD threshold, длительности тишины и максимального фрагмента. NeMo имеет собственный GPU batch size; увеличивайте его отдельно и оставляйте запас VRAM для выбранного движка распознавания.
 
 ### Приватность
 
@@ -244,6 +246,8 @@ The on-screen preview contains the complete transcript and can be copied directl
 
 NeMo is installed by default for NVIDIA GPU systems. Some pyannote models require a Hugging Face read token and acceptance of their model terms. Copy `.env.example` to `.env` and set:
 
+NeMo runs VAD and TitaNet embeddings on CUDA. Its batch size and data-worker count are configurable separately. **Reuse transcription VAD for NeMo** skips the duplicate speech-detector pass by passing intervals already found by Whisper or GigaAM to NeMo; the full three-scale embedding extraction and speaker clustering still run. The NeMo runtime is warmed when the application starts, keeping its heavy imports outside job processing time. A batch size of 256 is verified for an RTX 5090. A larger batch was slower on long audio because of padding.
+
 ```dotenv
 HF_TOKEN=hf_your_read_token
 ```
@@ -260,7 +264,7 @@ Never commit `.env`; it is excluded by `.gitignore`.
 
 The public defaults live in `config.example.json`. On first start they are copied to the ignored local file `config.json`. Use the Settings tab for normal changes.
 
-Hardware profiles configure Whisper automatically from available VRAM. GigaAM has separate model, device, batch, VAD threshold, silence, and maximum segment controls.
+Hardware profiles configure Whisper automatically from available VRAM. GigaAM has separate model, device, batch, VAD threshold, silence, and maximum segment controls. NeMo has its own GPU batch size; tune it independently while leaving VRAM headroom for the selected transcription engine.
 
 ## Privacy
 

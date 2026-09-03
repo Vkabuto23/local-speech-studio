@@ -52,6 +52,9 @@ const vramInput = $("#vramInput");
 const profileSelect = $("#profileSelect");
 const defaultDiarizationSelect = $("#defaultDiarizationSelect");
 const defaultSpeakersInput = $("#defaultSpeakersInput");
+const nemoBatchSizeInput = $("#nemoBatchSizeInput");
+const nemoNumWorkersInput = $("#nemoNumWorkersInput");
+const nemoReuseVadInput = $("#nemoReuseVadInput");
 const maxUploadInput = $("#maxUploadInput");
 const engineInputs = $$("input[name='transcriptionEngine']");
 const whisperRuntimeDetails = $("#whisperRuntimeDetails");
@@ -302,6 +305,9 @@ async function loadSettings() {
     profileSelect.value = config.hardware?.profile ?? "balanced";
     defaultDiarizationSelect.value = dc.default_engine ?? "nemo";
     defaultSpeakersInput.value = dc.default_speakers ?? 0;
+    nemoBatchSizeInput.value = dc.batch_size ?? 128;
+    nemoNumWorkersInput.value = dc.num_workers ?? 0;
+    nemoReuseVadInput.checked = dc.reuse_transcription_vad !== false;
     maxUploadInput.value = config.max_upload_mb ?? 2048;
     diarizationEngineSelect.value = dc.default_engine ?? "nemo";
     speakersInput.value = dc.default_speakers ?? 0;
@@ -391,6 +397,10 @@ async function saveSettings() {
     diarization: {
       default_engine: defaultDiarizationSelect.value,
       default_speakers: Number(defaultSpeakersInput.value),
+      device: "cuda",
+      batch_size: Number(nemoBatchSizeInput.value),
+      num_workers: Number(nemoNumWorkersInput.value),
+      reuse_transcription_vad: nemoReuseVadInput.checked,
     },
     max_upload_mb: Number(maxUploadInput.value),
   };

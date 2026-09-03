@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import shutil
+import threading
 import time
 import uuid
 from pathlib import Path
@@ -20,7 +21,7 @@ from dotenv import load_dotenv
 from diarization_engine import assign_speakers, diarize_file
 from exporters import diarized_text, render_export, safe_filename
 from gigaam_engine import gigaam_available, transcribe_file_with_gigaam
-from nemo_engine import NEMO_RUNS_DIR, diarize_file_with_nemo
+from nemo_engine import NEMO_RUNS_DIR, diarize_file_with_nemo, shutdown_nemo_worker, warm_nemo_worker
 from runtime_settings import (
     GIGAAM_MODEL_CATALOG,
     MODEL_CATALOG,
@@ -372,6 +373,17 @@ async def run_transcription(
                         diarize_file_with_nemo,
                         file_path=file_path,
                         speakers=speakers,
+                        device=str(dc.get("device", "cuda")),
+                        batch_size=int(dc.get("batch_size", 128)),
+                        num_workers=int(dc.get("num_workers", 0)),
+                        vad_segments=(
+                            [
+                                {"start": segment.get("start"), "end": segment.get("end")}
+                                for segment in result.get("segments", [])
+                            ]
+                            if bool(dc.get("reuse_transcription_vad", True))
+                            else None
+                        ),
                         keep_artifacts=bool(dc.get("keep_artifacts", False)),
                         on_progress=lambda percent, message: set_progress(job_id, percent, message, "running"),
                     )
@@ -421,6 +433,13 @@ def startup() -> None:
         check_ffmpeg(config.get("ffmpeg_path", "ffmpeg"))
     except Exception as exc:
         logger.warning("ffmpeg check failed at startup: %s", exc)
+    if config.get("diarization", {}).get("default_engine", "nemo") == "nemo":
+        threading.Thread(target=warm_nemo_worker, name="nemo-warmup", daemon=True).start()
+
+
+@app.on_event("shutdown")
+def shutdown() -> None:
+    shutdown_nemo_worker()
 
 
 @app.get("/", response_class=HTMLResponse)

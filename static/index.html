@@ -216,6 +216,9 @@
             <div class="settings-grid compact-grid">
               <label>Движок по умолчанию<select id="defaultDiarizationSelect"><option value="nemo">NVIDIA NeMo</option><option value="pyannote">pyannote.audio</option></select></label>
               <label>Спикеров по умолчанию (0 = авто)<input id="defaultSpeakersInput" type="number" min="0" max="12" /></label>
+              <label>NeMo batch size<input id="nemoBatchSizeInput" type="number" min="1" max="1024" /></label>
+              <label>NeMo data workers<input id="nemoNumWorkersInput" type="number" min="0" max="16" /></label>
+              <label class="check setting-check"><input id="nemoReuseVadInput" type="checkbox" /><span>NeMo: использовать VAD транскрипции</span></label>
               <label>Лимит загрузки, МБ<input id="maxUploadInput" type="number" min="32" max="16384" /></label>
             </div>
           </section>

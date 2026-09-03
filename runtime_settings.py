@@ -257,7 +257,24 @@ def validate_settings(current: Dict[str, Any], payload: Dict[str, Any]) -> Dict[
     speakers = int(incoming_dc.get("default_speakers", diarization.get("default_speakers", 0)))
     if not 0 <= speakers <= 12:
         raise ValueError("Speaker count must be 0 (auto) or between 1 and 12")
-    diarization.update(default_engine=engine, default_speakers=speakers)
+    diarization_device = str(incoming_dc.get("device", diarization.get("device", "cuda"))).lower()
+    if diarization_device not in {"cuda", "cpu"}:
+        raise ValueError("Diarization device must be cuda or cpu")
+    diarization_batch_size = int(incoming_dc.get("batch_size", diarization.get("batch_size", 128)))
+    if not 1 <= diarization_batch_size <= 1024:
+        raise ValueError("Diarization batch_size must be between 1 and 1024")
+    diarization_num_workers = int(incoming_dc.get("num_workers", diarization.get("num_workers", 0)))
+    if not 0 <= diarization_num_workers <= 16:
+        raise ValueError("Diarization num_workers must be between 0 and 16")
+    diarization.update(
+        default_engine=engine,
+        default_speakers=speakers,
+        device=diarization_device,
+        batch_size=diarization_batch_size,
+        num_workers=diarization_num_workers,
+    )
+    if "reuse_transcription_vad" in incoming_dc:
+        diarization["reuse_transcription_vad"] = bool(incoming_dc["reuse_transcription_vad"])
 
     max_upload_mb = int(payload.get("max_upload_mb", updated.get("max_upload_mb", 2048)))
     if not 32 <= max_upload_mb <= 16384:
